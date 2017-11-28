@@ -1166,6 +1166,13 @@ def bias_add(value, bias, data_format=None, name=None):
   Returns:
     A `Tensor` with the same type as `value`.
   """
+  '''
+  convolution's dims=[3,3,in_channel,out_channel];;;
+  out_channel for filter's out-channel; in other words, a output channel corresponds to an feature map namely an kernel
+  **each kernel corresponds to an feature map; and the neuron in an same feature shares the same bias;
+  so the bias' size is equal to the last dim of the convolution output.
+  
+  '''
   with ops.name_scope(name, "BiasAdd", [value, bias]) as name:
     value = ops.convert_to_tensor(value, name="input")
     bias = ops.convert_to_tensor(bias, dtype=value.dtype, name="bias")
