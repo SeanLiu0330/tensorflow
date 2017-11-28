@@ -128,6 +128,10 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
   Returns:
     Variable Tensor
   """
+  '''
+  weight-decay is used as an compensate for over-fitting; it has no influence on the kernel itself;
+  just add the weight_decay item to a collection named 'losses', and that's all;
+  '''
   dtype = tf.float16 if FLAGS.use_fp16 else tf.float32
   var = _variable_on_cpu(
       name,
@@ -138,7 +142,7 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
     tf.add_to_collection('losses', weight_decay)
   return var
 
-
+'''Model Inputs =================================='''
 def distorted_inputs():
   """Construct distorted input for CIFAR training using the Reader ops.
 
@@ -163,7 +167,7 @@ def distorted_inputs():
 def inputs(eval_data):
   """Construct input for CIFAR evaluation using the Reader ops.
 
-  Args:
+  Args: 
     eval_data: bool, indicating if one should use the train or eval data set.
 
   Returns:
@@ -184,7 +188,7 @@ def inputs(eval_data):
     labels = tf.cast(labels, tf.float16)
   return images, labels
 
-
+# Model Prediction ===============================
 def inference(images):
   """Build the CIFAR-10 model.
 
@@ -292,6 +296,10 @@ def loss(logits, labels):
 
   # The total loss is defined as the cross entropy loss plus all of the weight
   # decay terms (L2 loss).
+  '''weight_decay also added to the collection named 'losses', we can think that a collection is used to hold some 
+  Tensor or some Operation which we shall use later on! so that we can find those tensor and operations all at onece
+  and it's convenient!
+  '''
   return tf.add_n(tf.get_collection('losses'), name='total_loss')
 
 
@@ -316,7 +324,7 @@ def _add_loss_summaries(total_loss):
   for l in losses + [total_loss]:
     # Name each loss as '(raw)' and name the moving average version of the loss
     # as the original loss name.
-    tf.scalar_summary(l.op.name +' (raw)', l)
+    tf.scalar_summary(l.op.name + ' (raw)', l)
     tf.scalar_summary(l.op.name, loss_averages.average(l))
 
   return loss_averages_op
@@ -337,7 +345,7 @@ def train(total_loss, global_step):
   """
   # Variables that affect learning rate.
   num_batches_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / FLAGS.batch_size
-  decay_steps = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
+  decay_steps = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)   # learning rata decay in this  step;
 
   # Decay the learning rate exponentially based on the number of steps.
   lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,
