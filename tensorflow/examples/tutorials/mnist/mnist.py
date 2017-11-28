@@ -40,13 +40,15 @@ NUM_CLASSES = 10
 # The MNIST images are always 28x28 pixels.
 IMAGE_SIZE = 28
 IMAGE_PIXELS = IMAGE_SIZE * IMAGE_SIZE
+print("using:source code file: mnis.mnist.py")
 
 
 def inference(images, hidden1_units, hidden2_units):
+
   """Build the MNIST model up to where it may be used for inference.
 
   Args:
-    images: Images placeholder, from inputs().
+    images: Images placeholder, from inputs(). [batch_size, image_pixels]
     hidden1_units: Size of the first hidden layer.
     hidden2_units: Size of the second hidden layer.
 
@@ -54,14 +56,17 @@ def inference(images, hidden1_units, hidden2_units):
     softmax_linear: Output tensor with the computed logits.
   """
   # Hidden 1
+  # images accept image_placeholder && hidden1,hidden2 for neural units numbers
+  print('called inference')
   with tf.name_scope('hidden1'):
     weights = tf.Variable(
         tf.truncated_normal([IMAGE_PIXELS, hidden1_units],
                             stddev=1.0 / math.sqrt(float(IMAGE_PIXELS))),
         name='weights')
     biases = tf.Variable(tf.zeros([hidden1_units]),
-                         name='biases')
+                         name='biases') # each for one reural unit;
     hidden1 = tf.nn.relu(tf.matmul(images, weights) + biases)
+      #hidden1 for [batch_size, image_pixels]*[image_pixels,hidden1] = [batch_size,hidden1] +bias[hidden1]
   # Hidden 2
   with tf.name_scope('hidden2'):
     weights = tf.Variable(
@@ -70,8 +75,12 @@ def inference(images, hidden1_units, hidden2_units):
         name='weights')
     biases = tf.Variable(tf.zeros([hidden2_units]),
                          name='biases')
-    hidden2 = tf.nn.relu(tf.matmul(hidden1, weights) + biases)
-  # Linear
+    hidden2 = tf.nn.relu(tf.matmul(hidden1, weights) + biases) #[batch_size, image_pixels]*[image_pixels,hidden1] = [batch_size,hidden1] +bias[hidden1]
+  ############### here is the basic nerual layers' implementation;
+  #### ATTENTION:
+  #### 1. shapes of weights && bias;
+  #### 2. the format and content of the output;
+  # Linear     As output_layer;
   with tf.name_scope('softmax_linear'):
     weights = tf.Variable(
         tf.truncated_normal([hidden2_units, NUM_CLASSES],
@@ -93,7 +102,8 @@ def loss(logits, labels):
   Returns:
     loss: Loss tensor of type float.
   """
-  labels = tf.to_int64(labels)
+  print('called LOSS')
+  labels = tf.to_int64(labels) # shapes of labels == [batch_size]
   cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(
       labels=labels, logits=logits, name='xentropy')
   return tf.reduce_mean(cross_entropy, name='xentropy_mean')
@@ -117,6 +127,7 @@ def training(loss, learning_rate):
     train_op: The Op for training.
   """
   # Add a scalar summary for the snapshot loss.
+  print('called TRAINING00000000000000000000000000000000000000000000000000000000000000')
   tf.summary.scalar('loss', loss)
   # Create the gradient descent optimizer with the given learning rate.
   optimizer = tf.train.GradientDescentOptimizer(learning_rate)
@@ -144,6 +155,7 @@ def evaluation(logits, labels):
   # It returns a bool tensor with shape [batch_size] that is true for
   # the examples where the label is in the top k (here k=1)
   # of all logits for that example.
+  print('called EVALUATION')
   correct = tf.nn.in_top_k(logits, labels, 1)
   # Return the number of true entries.
   return tf.reduce_sum(tf.cast(correct, tf.int32))

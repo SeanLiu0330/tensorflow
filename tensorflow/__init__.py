@@ -21,6 +21,7 @@ from __future__ import division
 from __future__ import print_function
 
 # pylint: disable=wildcard-import
+print("init_of_tensorflow_init_of_tensorflow_init_of_tensorflow_init_of_tensorflow_init_of_tensorflow_init_of_tensorflow_")
 from tensorflow.python import *
 # pylint: enable=wildcard-import
 

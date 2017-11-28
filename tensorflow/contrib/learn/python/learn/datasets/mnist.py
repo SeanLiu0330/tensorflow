@@ -31,6 +31,7 @@ from tensorflow.python.platform import gfile
 
 # CVDF mirror of http://yann.lecun.com/exdb/mnist/
 DEFAULT_SOURCE_URL = 'https://storage.googleapis.com/cvdf-datasets/mnist/'
+print("using:source code file: dataset.mnist.py")
 
 
 def _read32(bytestream):
@@ -121,7 +122,7 @@ class DataSet(object):
     seed1, seed2 = random_seed.get_seed(seed)
     # If op level seed is not set, use whatever graph level seed is returned
     numpy.random.seed(seed1 if seed is None else seed2)
-    dtype = dtypes.as_dtype(dtype).base_dtype
+    dtype = dtypes.as_dtype(dtype).base_dtype # Converts the given `type_value` to a `DType`
     if dtype not in (dtypes.uint8, dtypes.float32):
       raise TypeError('Invalid image dtype %r, expected uint8 or float32' %
                       dtype)
@@ -139,13 +140,16 @@ class DataSet(object):
         assert images.shape[3] == 1
         images = images.reshape(images.shape[0],
                                 images.shape[1] * images.shape[2])
+      ''' change the shape of the image array: means get each image's line merged 
+      && in the new array, one line for one image'''
       if dtype == dtypes.float32:
         # Convert from [0, 255] -> [0.0, 1.0].
-        images = images.astype(numpy.float32)
+        images = images.astype(numpy.float32) # Copy of the array, cast to a specified type.
         images = numpy.multiply(images, 1.0 / 255.0)
+        ''' 0.0 ---- 1.0'''
     self._images = images
     self._labels = labels
-    self._epochs_completed = 0
+    self._epochs_completed = 0  ## what's the two parameters
     self._index_in_epoch = 0
 
   @property
@@ -158,7 +162,7 @@ class DataSet(object):
 
   @property
   def num_examples(self):
-    return self._num_examples
+    return self._num_examples # how many images are in the dataset
 
   @property
   def epochs_completed(self):
@@ -167,17 +171,18 @@ class DataSet(object):
   def next_batch(self, batch_size, fake_data=False, shuffle=True):
     """Return the next `batch_size` examples from this data set."""
     if fake_data:
-      fake_image = [1] * 784
+      fake_image = [1] * 784  # all the pixles are '1'
       if self.one_hot:
-        fake_label = [1] + [0] * 9
+        fake_label = [1] + [0] * 9   #[1,0,0,0,0,0,0,0,0,0]; this is "1-of-10" coding scheme
       else:
-        fake_label = 0
+        fake_label = 0               # one hot for an specific codding scheme
       return [fake_image for _ in xrange(batch_size)], [
           fake_label for _ in xrange(batch_size)
       ]
     start = self._index_in_epoch
     # Shuffle for the first epoch
     if self._epochs_completed == 0 and start == 0 and shuffle:
+      # methods to shuffle a array;
       perm0 = numpy.arange(self._num_examples)
       numpy.random.shuffle(perm0)
       self._images = self.images[perm0]
@@ -267,7 +272,7 @@ def read_data_sets(train_dir,
   train_labels = train_labels[validation_size:]
 
 
-  options = dict(dtype=dtype, reshape=reshape, seed=seed)
+  options = dict(dtype=dtype, reshape=reshape, seed=seed) # kwarg... transfer to the next function
 
   train = DataSet(train_images, train_labels, **options)
   validation = DataSet(validation_images, validation_labels, **options)

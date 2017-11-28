@@ -24,6 +24,18 @@ import os
 import sys
 import time
 
+cp = os.getcwd()
+print('current path:'+cp)   # yun xing mulu ;  xianshi de shi /home/sean
+print("##################################################")
+print(sys.path)
+print(os.path)
+print(sys.argv[0])
+print(os.path.split( os.path.realpath( sys.argv[0] ) ))
+print("##################################################")
+ScriptPath = os.path.split( os.path.realpath( sys.argv[0] ) )[0]
+print(ScriptPath)
+
+
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
@@ -50,6 +62,7 @@ def placeholder_inputs(batch_size):
   # Note that the shapes of the placeholders match the shapes of the full
   # image and label tensors, except the first dimension is now batch_size
   # rather than the full size of the train or test data sets.
+  print('called placeholder_inputs')
   images_placeholder = tf.placeholder(tf.float32, shape=(batch_size,
                                                          mnist.IMAGE_PIXELS))
   labels_placeholder = tf.placeholder(tf.int32, shape=(batch_size))
@@ -75,6 +88,7 @@ def fill_feed_dict(data_set, images_pl, labels_pl):
   """
   # Create the feed_dict for the placeholders filled with the next
   # `batch size` examples.
+  #print('called FILL_FEED_DICT')
   images_feed, labels_feed = data_set.next_batch(FLAGS.batch_size,
                                                  FLAGS.fake_data)
   feed_dict = {
@@ -117,9 +131,12 @@ def run_training():
   """Train MNIST for a number of steps."""
   # Get the sets of images and labels for training, validation, and
   # test on MNIST.
+  print('called RUN_TRAINING')
+  print('DATA downloading...')
   data_sets = input_data.read_data_sets(FLAGS.input_data_dir, FLAGS.fake_data)
-
+  print('DATA download finished')
   # Tell TensorFlow that the model will be built into the default Graph.
+
   with tf.Graph().as_default():
     # Generate placeholders for the images and labels.
     images_placeholder, labels_placeholder = placeholder_inputs(
@@ -129,6 +146,7 @@ def run_training():
     logits = mnist.inference(images_placeholder,
                              FLAGS.hidden1,
                              FLAGS.hidden2)
+    # shape of logits==[batch_size,NUM_CLASS]
 
     # Add to the Graph the Ops for loss calculation.
     loss = mnist.loss(logits, labels_placeholder)
@@ -216,6 +234,7 @@ def run_training():
 
 
 def main(_):
+  print('called MAIN')
   if tf.gfile.Exists(FLAGS.log_dir):
     tf.gfile.DeleteRecursively(FLAGS.log_dir)
   tf.gfile.MakeDirs(FLAGS.log_dir)
@@ -276,4 +295,4 @@ if __name__ == '__main__':
   )
 
   FLAGS, unparsed = parser.parse_known_args()
-  tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
+  tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)  # what's the function????!!!!
