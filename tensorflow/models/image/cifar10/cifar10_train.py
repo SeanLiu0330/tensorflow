@@ -84,6 +84,7 @@ def train():
     summary_op = tf.summary.merge_all()
 
     # Build an initialization operation to run below.
+    # 其他的初始化方案应该也是可以放在这个位置的
     init = tf.global_variables_initializer()
 
     # Start running operations on the Graph.
@@ -92,18 +93,24 @@ def train():
     sess.run(init)
 
     # Start the queue runners.
+    # 和 计算性能有关的；这里是 tensorflow中一种 提高计算性能的机制：queue；貌似是把一堆操作放在各个queue中；
+    # 然后用不同 的thread来计算； 还没有细看
+    # 针对 sess 运行的操作：
     tf.train.start_queue_runners(sess=sess)
 
+    # 这里第一次创建 summary_writer???
     summary_writer = tf.summary.FileWriter(FLAGS.train_dir, sess.graph)
 
     for step in xrange(FLAGS.max_steps):
       start_time = time.time()
       _, loss_value = sess.run([train_op, loss])
       duration = time.time() - start_time
-
+      # 如果 当前计算出的 loss not a number的话会进行报错；
       assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
+
       if step % 10 == 0:
+        # 每10步进行一次展示，统计当前的执行速度以及当前的 loss_value
         num_examples_per_step = FLAGS.batch_size
         examples_per_sec = num_examples_per_step / duration
         sec_per_batch = float(duration)
@@ -119,6 +126,7 @@ def train():
 
       # Save the model checkpoint periodically.
       if step % 1000 == 0 or (step + 1) == FLAGS.max_steps:
+        # 每一千step 进行一次存储；将当前训练好的 变量的数值存储到 checkpoint中
         checkpoint_path = os.path.join(FLAGS.train_dir, 'model.ckpt')
         saver.save(sess, checkpoint_path, global_step=step)
 
